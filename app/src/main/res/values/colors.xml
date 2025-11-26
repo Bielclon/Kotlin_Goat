@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="nurse_card_bg_normal">#FFFFFF</color>
+    <color name="nurse_card_bg_selected">#E0E0E0</color>
+    <color name="nurse_icon">#034187</color>
+    <color name="nurse_icon_small">#2D37AF</color>
+    <color name="text_primary">#888888</color>
+    <color name="transparent">#00000000</color>
 </resources>
