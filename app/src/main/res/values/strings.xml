@@ -2,4 +2,8 @@
     <string name="app_name">My Application</string>
     <string name="nurse_list">Listado de Enfermeros</string>
     <string name="nurse_message_icon">Icono No encontrado</string>
+    <string name="pantalla_inicial">Pantalla Inicial</string>
+    <string name="ir_a_login">Ir a Login</string>
+    <string name="ir_a_lista_de_enfermeros">Ir a Lista de Enfermeros</string>
+    <string name="ir_a_b_squeda">Ir a Búsqueda</string>
 </resources>

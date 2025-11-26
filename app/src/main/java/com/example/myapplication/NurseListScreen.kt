@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,11 +19,23 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,33 +47,94 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen() {
+fun ListScreen(navController: NavHostController) {
+
+    var expanded by remember { mutableStateOf(false) }
+
     val allNurses = listOf(
-        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal","pol@hospital.com"),
-        Nurse(2, "Ana", "García", "ana_g", "ana.garcia","ana.garcia@hospital.com"),
-        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna","biel@hospital.com"),
-        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres","laura@hospital.com"),
-        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz","carlos@hospital.com")
+        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal", "pol@hospital.com"),
+        Nurse(2, "Ana", "García", "ana_g", "ana.garcia", "ana.garcia@hospital.com"),
+        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna", "biel@hospital.com"),
+        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres", "laura@hospital.com"),
+        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz", "carlos@hospital.com")
     )
 
-    Column(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.nurse_list),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
+            .statusBarsPadding(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.nurse_list))
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(id = R.color.nurse_icon),
+                    titleContentColor = colorResource(R.color.white),
+                    actionIconContentColor = colorResource(R.color.white)
+                ),
+                actions = {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(id = R.string.nurse_message_icon)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Inicio") },
+                            onClick = {
+                                expanded = false
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            },
+                            leadingIcon = { Icon(Icons.Default.Home, stringResource(id = R.string.nurse_message_icon)) }
+                        )
+
+                        // Opción 2: LOGIN
+                        DropdownMenuItem(
+                            text = { Text("Login") },
+                            onClick = {
+                                expanded = false
+                                navController.navigate("login")
+                            },
+                            leadingIcon = { Icon(Icons.Default.ExitToApp, stringResource(R.string.nurse_message_icon)) }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Buscar") },
+                            onClick = {
+                                navController.navigate("search")
+                            },
+                            leadingIcon = { Icon(Icons.Default.Search, stringResource(R.string.nurse_message_icon)) }
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
         ) {
-            items(allNurses) {
-                NurseItem(nurse = it)
+            LazyColumn(
+                contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(allNurses) { nurse ->
+                    NurseItem(nurse = nurse)
+                }
             }
         }
     }
