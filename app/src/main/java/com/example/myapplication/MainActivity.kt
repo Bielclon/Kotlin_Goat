@@ -30,9 +30,9 @@ class MainActivity : ComponentActivity() {
                     ListScreen(navController)
                 }
 
-//                composable("login") {
-//
-//                }
+                composable("login") {
+                    LoginScreen(navController)
+                }
 
 //                composable("search") {
 //
