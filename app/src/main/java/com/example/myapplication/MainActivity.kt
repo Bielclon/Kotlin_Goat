@@ -34,9 +34,9 @@ class MainActivity : ComponentActivity() {
                     LoginScreen(navController)
                 }
 
-//                composable("search") {
-//
-//                }
+                composable("search") {
+                    NurseSearch(navController)
+                }
             }
         }
     }
