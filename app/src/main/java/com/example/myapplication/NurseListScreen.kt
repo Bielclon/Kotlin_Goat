@@ -23,8 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
@@ -55,13 +53,8 @@ fun ListScreen(navController: NavHostController) {
 
     var expanded by remember { mutableStateOf(false) }
 
-    val allNurses = listOf(
-        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal", "pol@hospital.com"),
-        Nurse(2, "Ana", "García", "ana_g", "ana.garcia", "ana.garcia@hospital.com"),
-        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna", "biel@hospital.com"),
-        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres", "laura@hospital.com"),
-        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz", "carlos@hospital.com")
-    )
+    // Usamos la lista compartida de enfermeros
+    val allNurses = NurseData.nurses
 
     Scaffold(
         modifier = Modifier
@@ -90,32 +83,22 @@ fun ListScreen(navController: NavHostController) {
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Inicio") },
-                            onClick = {
-                                expanded = false
-                                navController.navigate("home") {
-                                    popUpTo("home") { inclusive = true }
-                                }
-                            },
-                            leadingIcon = { Icon(Icons.Default.Home, stringResource(id = R.string.nurse_message_icon)) }
-                        )
-
-                        // Opción 2: LOGIN
-                        DropdownMenuItem(
-                            text = { Text("Login") },
-                            onClick = {
-                                expanded = false
-                                navController.navigate("login")
-                            },
-                            leadingIcon = { Icon(Icons.Default.ExitToApp, stringResource(R.string.nurse_message_icon)) }
-                        )
-
-                        DropdownMenuItem(
                             text = { Text("Buscar") },
                             onClick = {
                                 navController.navigate("search")
                             },
                             leadingIcon = { Icon(Icons.Default.Search, stringResource(R.string.nurse_message_icon)) }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Cerrar sesión") },
+                            onClick = {
+                                expanded = false
+                                navController.navigate("login") {
+                                    popUpTo("listAll") { inclusive = true }
+                                }
+                            },
+                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, stringResource(R.string.nurse_message_icon)) }
                         )
                     }
                 }
@@ -143,7 +126,6 @@ fun ListScreen(navController: NavHostController) {
 
 @Composable
 fun NurseItem(nurse: Nurse) {
-    var isSelected by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,16 +136,9 @@ fun NurseItem(nurse: Nurse) {
                 clip = false,
                 ambientColor = colorResource(id = R.color.transparent),
                 spotColor = colorResource(id = R.color.black).copy(alpha = 0.5f)
-            )
-            .clickable {
-                isSelected = !isSelected
-            },
+            ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                colorResource(id = R.color.nurse_card_bg_selected)
-            } else {
-                colorResource(id = R.color.nurse_card_bg_normal)
-            }
+            containerColor = colorResource(id = R.color.nurse_card_bg_normal)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp,
@@ -190,7 +165,7 @@ fun NurseItem(nurse: Nurse) {
                     text = "${nurse.name} ${nurse.surname}",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Row() {
+                Row {
                     Icon(
                         imageVector = Icons.Default.Badge,
                         contentDescription = stringResource(R.string.nurse_message_icon),

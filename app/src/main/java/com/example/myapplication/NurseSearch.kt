@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,16 +25,11 @@ import androidx.navigation.NavController
 
 @Composable
 fun NurseSearch(navController: NavController) {
-    val allNurses = listOf(
-        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal", "pol@hospital.com"),
-        Nurse(2, "Ana", "García", "ana_g", "ana.garcia", "ana.garcia@hospital.com"),
-        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna", "biel@hospital.com"),
-        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres", "laura@hospital.com"),
-        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz", "carlos@hospital.com")
-    )
+    // Usamos la lista compartida de enfermeros
+    val allNurses = NurseData.nurses
 
     var query by remember { mutableStateOf("") }
-    var results by remember { mutableStateOf(allNurses) }
+    var results: List<Nurse> by remember { mutableStateOf(allNurses) }
 
     fun doSearch(q: String) {
         val trimmed = q.trim().lowercase()
@@ -83,12 +77,6 @@ fun NurseSearch(navController: NavController) {
                     NurseItem(nurse = nurse)
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextButton(onClick = { navController.navigate("home") }) {
-            Text(text = "Volver al inicio")
         }
     }
 }
