@@ -25,14 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun NurseSearch(navController: NavController) {
-    val allNurses = listOf(
-        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal", "pol@hospital.com"),
-        Nurse(2, "Ana", "García", "ana_g", "ana.garcia", "ana.garcia@hospital.com"),
-        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna", "biel@hospital.com"),
-        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres", "laura@hospital.com"),
-        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz", "carlos@hospital.com")
-    )
+fun NurseSearch(navController: NavController, nurseService: NurseService = MockNurseService()) {
+    val allNurses = remember { nurseService.getAllNurses() }
 
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf(allNurses) }

@@ -15,21 +15,20 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,17 +50,11 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(navController: NavHostController) {
+fun ListScreen(navController: NavHostController, nurseService: NurseService = MockNurseService()) {
 
     var expanded by remember { mutableStateOf(false) }
 
-    val allNurses = listOf(
-        Nurse(1, "Pol", "Carvajal", "pol123", "pol.carvajal", "pol@hospital.com"),
-        Nurse(2, "Ana", "García", "ana_g", "ana.garcia", "ana.garcia@hospital.com"),
-        Nurse(3, "Biel", "Laguna", "biel_l", "biel.laguna", "biel@hospital.com"),
-        Nurse(4, "Laura", "Torres", "laura.t", "laura.torres", "laura@hospital.com"),
-        Nurse(5, "Carlos", "Ruiz", "charlie", "carlos.ruiz", "carlos@hospital.com")
-    )
+    val allNurses = remember { nurseService.getAllNurses() }
 
     Scaffold(
         modifier = Modifier
@@ -107,7 +100,7 @@ fun ListScreen(navController: NavHostController) {
                                 expanded = false
                                 navController.navigate("login")
                             },
-                            leadingIcon = { Icon(Icons.Default.ExitToApp, stringResource(R.string.nurse_message_icon)) }
+                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, stringResource(R.string.nurse_message_icon)) }
                         )
 
                         DropdownMenuItem(
