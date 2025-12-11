@@ -19,15 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, nurseService: NurseService = MockNurseService()) {
     // Estados para los campos de texto
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
 
-    // Usamos la lista compartida de enfermeros
-    val allNurses = NurseData.nurses
+    val allNurses = remember { nurseService.getAllNurses()
 
     Column(
         modifier = Modifier

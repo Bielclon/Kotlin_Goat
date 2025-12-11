@@ -15,19 +15,20 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -49,12 +50,11 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(navController: NavHostController) {
+fun ListScreen(navController: NavHostController, nurseService: NurseService = MockNurseService()) {
 
     var expanded by remember { mutableStateOf(false) }
 
-    // Usamos la lista compartida de enfermeros
-    val allNurses = NurseData.nurses
+    val allNurses = remember { nurseService.getAllNurses() }
 
     Scaffold(
         modifier = Modifier
@@ -83,22 +83,32 @@ fun ListScreen(navController: NavHostController) {
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
+                            text = { Text("Inicio") },
+                            onClick = {
+                                expanded = false
+                                navController.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            },
+                            leadingIcon = { Icon(Icons.Default.Home, stringResource(id = R.string.nurse_message_icon)) }
+                        )
+
+                        // Opción 2: LOGIN
+                        DropdownMenuItem(
+                            text = { Text("Login") },
+                            onClick = {
+                                expanded = false
+                                navController.navigate("login")
+                            },
+                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, stringResource(R.string.nurse_message_icon)) }
+                        )
+
+                        DropdownMenuItem(
                             text = { Text("Buscar") },
                             onClick = {
                                 navController.navigate("search")
                             },
                             leadingIcon = { Icon(Icons.Default.Search, stringResource(R.string.nurse_message_icon)) }
-                        )
-
-                        DropdownMenuItem(
-                            text = { Text("Cerrar sesión") },
-                            onClick = {
-                                expanded = false
-                                navController.navigate("login") {
-                                    popUpTo("listAll") { inclusive = true }
-                                }
-                            },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, stringResource(R.string.nurse_message_icon)) }
                         )
                     }
                 }
@@ -126,6 +136,7 @@ fun ListScreen(navController: NavHostController) {
 
 @Composable
 fun NurseItem(nurse: Nurse) {
+    var isSelected by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -136,9 +147,16 @@ fun NurseItem(nurse: Nurse) {
                 clip = false,
                 ambientColor = colorResource(id = R.color.transparent),
                 spotColor = colorResource(id = R.color.black).copy(alpha = 0.5f)
-            ),
+            )
+            .clickable {
+                isSelected = !isSelected
+            },
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(id = R.color.nurse_card_bg_normal)
+            containerColor = if (isSelected) {
+                colorResource(id = R.color.nurse_card_bg_selected)
+            } else {
+                colorResource(id = R.color.nurse_card_bg_normal)
+            }
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp,
@@ -165,7 +183,7 @@ fun NurseItem(nurse: Nurse) {
                     text = "${nurse.name} ${nurse.surname}",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Row {
+                Row() {
                     Icon(
                         imageVector = Icons.Default.Badge,
                         contentDescription = stringResource(R.string.nurse_message_icon),
