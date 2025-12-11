@@ -26,7 +26,9 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
 
-    val allNurses = remember { nurseService.getAllNurses()
+    val allNurses = remember {
+        nurseService.getAllNurses()
+    }
 
     Column(
         modifier = Modifier
@@ -51,7 +53,12 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
                 isError = false
             },
             label = { Text("Usuario") },
-            leadingIcon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null
+                )
+            },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             isError = isError
@@ -75,11 +82,17 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
                     Icons.Filled.VisibilityOff
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Ocultar" else "Mostrar")
+                    Icon(
+                        imageVector = image,
+                        contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
+                    )
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             isError = isError,
@@ -99,7 +112,8 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
         Button(
             onClick = {
                 // Lógica de validación
-                val userFound = allNurses.find { it.username == username && it.password == password }
+                val userFound =
+                    allNurses.find { it.username == username && it.password == password }
 
                 if (userFound != null) {
                     // Navegar a la lista y limpiar historial
