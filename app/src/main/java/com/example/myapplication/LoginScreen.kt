@@ -26,7 +26,7 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
 
-    val allNurses = remember { nurseService.getAllNurses() }
+    val allNurses = remember { nurseService.getAllNurses()
 
     Column(
         modifier = Modifier
@@ -114,12 +114,6 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
             enabled = username.isNotEmpty() && password.isNotEmpty()
         ) {
             Text("Entrar")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = { navController.navigate("home") }) {
-            Text("Volver al inicio")
         }
     }
 }

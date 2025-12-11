@@ -20,26 +20,10 @@ fun HomeScreen(navController: NavController) {
         Text(text = stringResource(R.string.pantalla_inicial), modifier = Modifier.padding(bottom = 32.dp))
 
         Button(
-            onClick = { navController.navigate("login") },
+            onClick = { navController.navigate("register") },
             modifier = Modifier.fillMaxWidth(0.7f)
         ) {
-            Text(stringResource(R.string.ir_a_login))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { navController.navigate("listAll") },
-            modifier = Modifier.fillMaxWidth(0.7f)
-        ) {
-            Text(stringResource(R.string.ir_a_lista_de_enfermeros))
-        }
-
-        Button(
-            onClick = { navController.navigate("search") },
-            modifier = Modifier.fillMaxWidth(0.7f)
-        ) {
-            Text(stringResource(R.string.ir_a_b_squeda))
+            Text("Ir a Registro")
         }
     }
 }

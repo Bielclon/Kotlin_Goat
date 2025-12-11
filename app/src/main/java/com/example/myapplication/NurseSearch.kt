@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +28,7 @@ fun NurseSearch(navController: NavController, nurseService: NurseService = MockN
     val allNurses = remember { nurseService.getAllNurses() }
 
     var query by remember { mutableStateOf("") }
-    var results by remember { mutableStateOf(allNurses) }
+    var results: List<Nurse> by remember { mutableStateOf(allNurses) }
 
     fun doSearch(q: String) {
         val trimmed = q.trim().lowercase()
@@ -77,12 +76,6 @@ fun NurseSearch(navController: NavController, nurseService: NurseService = MockN
                     NurseItem(nurse = nurse)
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        TextButton(onClick = { navController.navigate("home") }) {
-            Text(text = "Volver al inicio")
         }
     }
 }
