@@ -26,7 +26,7 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
 
-    val allNurses = remember { nurseService.getAllNurses()
+    val allNurses = remember { nurseService.getAllNurses() }
 
     Column(
         modifier = Modifier
