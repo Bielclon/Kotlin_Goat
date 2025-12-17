@@ -19,14 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(navController: NavController, nurseService: NurseService = MockNurseService()) {
+fun LoginScreen(navController: NavController) {
     // Estados para los campos de texto
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
-
-    val allNurses = remember { nurseService.getAllNurses() }
 
     Column(
         modifier = Modifier
@@ -109,9 +107,8 @@ fun LoginScreen(navController: NavController, nurseService: NurseService = MockN
         // --- Botón Login ---
         Button(
             onClick = {
-                // Lógica de validación
-                val userFound =
-                    allNurses.find { it.username == username && it.password == password }
+                // Lógica de validación contra NurseData (fuente única compartida)
+                val userFound = NurseData.nurses.find { it.username == username && it.password == password }
 
                 if (userFound != null) {
                     // Navegar a la lista y limpiar historial
