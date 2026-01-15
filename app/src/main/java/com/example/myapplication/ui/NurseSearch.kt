@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,53 +14,36 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.Nurse
+import com.example.myapplication.NurseItem
 
 @Composable
-fun NurseSearch(navController: NavController, nurseService: NurseService = MockNurseService()) {
-    val allNurses = remember { nurseService.getAllNurses() }
-
-    var query by remember { mutableStateOf("") }
-    var results: List<Nurse> by remember { mutableStateOf(allNurses) }
-
-    fun doSearch(q: String) {
-        val trimmed = q.trim().lowercase()
-        results = if (trimmed.isEmpty()) {
-            allNurses
-        } else {
-            allNurses.filter { nurse ->
-                nurse.name.lowercase().contains(trimmed)
-                        || nurse.surname.lowercase().contains(trimmed)
-                        || nurse.username.lowercase().contains(trimmed)
-                        || nurse.email.lowercase().contains(trimmed)
-            }
-        }
-    }
+fun NurseSearch(navController: NavController, viewModel: NurseSearchViewModel = viewModel()) {
+    val uiState by viewModel.uiState
 
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
 
         OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
+            value = uiState.query,
+            onValueChange = { viewModel.onQueryChange(it) },
             label = { Text(text = "Buscar enfermero") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { doSearch(query) })
+            keyboardActions = KeyboardActions(onSearch = { viewModel.onSearch() })
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = { doSearch(query) },
+            onClick = { viewModel.onSearch() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Buscar")
@@ -68,11 +51,11 @@ fun NurseSearch(navController: NavController, nurseService: NurseService = MockN
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (results.isEmpty()) {
+        if (uiState.results.isEmpty()) {
             Text(text = "No se encontraron resultados")
         } else {
             LazyColumn {
-                items(results) { nurse ->
+                items(uiState.results) { nurse ->
                     NurseItem(nurse = nurse)
                 }
             }
