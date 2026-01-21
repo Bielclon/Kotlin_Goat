@@ -219,7 +219,8 @@ fun RegisterScreen(navController: NavController) {
                             surname = surname,
                             password = password,
                             username = username,
-                            email = email
+                            email = email,
+                            photo = null
                         )
                         // Añadimos el nuevo enfermero a nuestra lista compartida
                         NurseData.addNurse(newNurse)

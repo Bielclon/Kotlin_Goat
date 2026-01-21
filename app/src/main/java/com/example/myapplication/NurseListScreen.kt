@@ -1,48 +1,24 @@
 package com.example.myapplication
 
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -50,11 +26,11 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListScreen(navController: NavHostController, nurseService: NurseService = MockNurseService()) {
+fun ListScreen(navController: NavHostController, viewModel: NurseViewModel) {
 
     var expanded by remember { mutableStateOf(false) }
 
-    val allNurses = remember { nurseService.getAllNurses() }
+    val allNurses = viewModel.nurses.value
 
     Scaffold(
         modifier = Modifier
@@ -93,7 +69,6 @@ fun ListScreen(navController: NavHostController, nurseService: NurseService = Mo
                             leadingIcon = { Icon(Icons.Default.Home, stringResource(id = R.string.nurse_message_icon)) }
                         )
 
-                        // Opción 2: LOGIN
                         DropdownMenuItem(
                             text = { Text("Login") },
                             onClick = {
@@ -137,6 +112,20 @@ fun ListScreen(navController: NavHostController, nurseService: NurseService = Mo
 @Composable
 fun NurseItem(nurse: Nurse) {
     var isSelected by remember { mutableStateOf(false) }
+
+    val imageBitmap = remember(nurse.photo) {
+        if (nurse.photo != null) {
+            try {
+                val decodedString = Base64.decode(nurse.photo, Base64.DEFAULT)
+                BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size).asImageBitmap()
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -169,12 +158,24 @@ fun NurseItem(nurse: Nurse) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = stringResource(R.string.nurse_message_icon),
-                modifier = Modifier.size(48.dp),
-                tint = colorResource(R.color.nurse_icon)
-            )
+
+            if (imageBitmap != null) {
+                Image(
+                    bitmap = imageBitmap,
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = stringResource(R.string.nurse_message_icon),
+                    modifier = Modifier.size(48.dp),
+                    tint = colorResource(R.color.nurse_icon)
+                )
+            }
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -216,5 +217,4 @@ fun NurseItem(nurse: Nurse) {
             }
         }
     }
-
 }
