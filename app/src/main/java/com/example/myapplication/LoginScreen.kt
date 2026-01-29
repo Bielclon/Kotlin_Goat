@@ -1,5 +1,7 @@
-package com.example.myapplication
+package com.example.myapplication.ui
 
+import AuthViewModel
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -11,20 +13,43 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(navController: NavController) {
-    // Estados para los campos de texto
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel() // 1. Inyectamos nuestro ViewModel
+) {
+    // 2. Observamos el estado del ViewModel
+    val state = viewModel.authState
+    val context = LocalContext.current
+
+    // Estado local solo para la visibilidad de la contraseña
     var passwordVisible by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
+
+    // 3. REACCIÓN: Cuando el estado cambia a Success o Error
+    LaunchedEffect(state) {
+        when (state) {
+            is AuthState.Success -> {
+                Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
+                // Navegar a la lista (ajusta la ruta "listAll" si es necesario)
+                navController.navigate("listAll") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+            is AuthState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            }
+            else -> {}
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -41,65 +66,36 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- Campo Usuario ---
+        // --- Campo Usuario (Conectado al ViewModel) ---
         OutlinedTextField(
-            value = username,
-            onValueChange = {
-                username = it
-                isError = false
-            },
-            label = { Text("Usuario") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null
-                )
-            },
+            value = viewModel.email, // Usamos la variable del ViewModel
+            onValueChange = { viewModel.email = it },
+            label = { Text("Email / Usuario") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            isError = isError
+            enabled = state !is AuthState.Loading // Se bloquea si está cargando
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Campo Contraseña ---
+        // --- Campo Contraseña (Conectado al ViewModel) ---
         OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-                isError = false
-            },
+            value = viewModel.password, // Usamos la variable del ViewModel
+            onValueChange = { viewModel.password = it },
             label = { Text("Contraseña") },
-            leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
             trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else
-                    Icons.Filled.VisibilityOff
-
+                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = image,
-                        contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
-                    )
+                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Ocultar" else "Mostrar")
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            isError = isError,
-            supportingText = {
-                if (isError) {
-                    Text(
-                        text = "Usuario o contraseña incorrectos",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
+            enabled = state !is AuthState.Loading // Se bloquea si está cargando
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -107,22 +103,29 @@ fun LoginScreen(navController: NavController) {
         // --- Botón Login ---
         Button(
             onClick = {
-                // Lógica de validación contra NurseData (fuente única compartida)
-                val userFound = NurseData.nurses.find { it.username == username && it.password == password }
-
-                if (userFound != null) {
-                    // Navegar a la lista y limpiar historial
-                    navController.navigate("listAll") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                } else {
-                    isError = true
-                }
+                // 4. ACCIÓN: Llamamos al login real del servidor
+                viewModel.login()
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = username.isNotEmpty() && password.isNotEmpty()
+            // Deshabilitado si los campos están vacíos O si ya está cargando
+            enabled = viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty() && state !is AuthState.Loading
         ) {
-            Text("Entrar")
+            if (state is AuthState.Loading) {
+                // Mostramos circulito si está cargando
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text("Entrar")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón extra para ir al registro (según pide el PDF)
+        TextButton(onClick = { navController.navigate("register") }) {
+            Text("¿No tienes cuenta? Regístrate")
         }
     }
 }
