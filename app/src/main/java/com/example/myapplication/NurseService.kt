@@ -4,28 +4,31 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import retrofit2.Response
+import retrofit2.http.Path
 import retrofit2.http.Body
+import retrofit2.http.PUT
+import retrofit2.http.DELETE
+import retrofit2.Response
 import retrofit2.http.POST
-import retrofit2.http.Query
 
 interface NurseService {
     @GET("nurse/index")
     fun listarNurses(): Call<List<Nurse>>
 
-    // --- AÑADIR: Buscar por nombre ---
-    @GET("nurse/findByName")
-    suspend fun buscarEnfermeros(@Query("name") query: String): Response<List<Nurse>>
+    @GET("nurse/{id}")
+    fun getNurseById(@Path("id") id: Long): Call<Nurse>
 
-    // --- NUEVO: Autenticación ---
-    // Nota: Verifica si la ruta en Kotlin_Goat es "login" o "auth/login"
+    @PUT("nurse/{id}")
+    fun updateNurse(@Path("id") id: Long, @Body nurse: Nurse): Call<Nurse>
 
+    @DELETE("nurse/{id}")
+    fun deleteNurse(@Path("id") id: Long): Call<Void>
+  
     @POST("nurse/login")
-    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+    fun login(@Body request: LoginRequest): Call<LoginResponse>
 
     @POST("nurse/register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
-
 }
 
 

@@ -8,13 +8,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.ui.LoginScreen
 import com.example.myapplication.ui.NurseSearch
+import com.example.myapplication.ProfileScreen
 import com.example.myapplication.ui.RegisterScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
@@ -24,9 +23,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            val nurseViewModel: NurseViewModel = viewModel()
+            val nurseViewModel = viewModel<NurseViewModel>()
 
-            NavHost(navController = navController, startDestination = "home") {
+            NavHost(navController = navController, startDestination = "register") {
 
                 composable("register") {
                     RegisterScreen(navController = navController)
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable("listAll") {
-                    ListScreen(navController,nurseViewModel)
+                    ListScreen(navController, nurseViewModel)
                 }
 
                 composable("login") {
@@ -46,6 +45,11 @@ class MainActivity : ComponentActivity() {
 
                 composable("search") {
                     NurseSearch(navController)
+                }
+
+                composable("profile") {
+                    val vm = viewModel<NurseViewModel>()
+                    ProfileScreen(navController = navController, viewModel = vm)
                 }
             }
         }
