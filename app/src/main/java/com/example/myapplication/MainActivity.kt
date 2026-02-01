@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val nurseViewModel = viewModel<NurseViewModel>()
 
-            NavHost(navController = navController, startDestination = "login") {
+            NavHost(navController = navController, startDestination = "register") {
 
                 composable("register") {
                     RegisterScreen(navController = navController)
