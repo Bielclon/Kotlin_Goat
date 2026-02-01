@@ -3,10 +3,6 @@ package com.example.myapplication
 // AuthModels.kt
 
 // Lo que enviamos para hacer Login
-data class LoginRequest(
-    val email: String,
-    val password: String
-)
 
 // Lo que enviamos para el Registro
 data class RegisterRequest(
