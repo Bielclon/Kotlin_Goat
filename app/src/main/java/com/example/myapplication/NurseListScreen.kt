@@ -85,6 +85,13 @@ fun ListScreen(navController: NavHostController, viewModel: NurseViewModel) {
                             },
                             leadingIcon = { Icon(Icons.Default.Search, stringResource(R.string.nurse_message_icon)) }
                         )
+                        DropdownMenuItem(
+                            text = { Text("Perfil") },
+                            onClick = {
+                                navController.navigate("profile")
+                            },
+                            leadingIcon = { Icon(Icons.Default.AccountCircle, stringResource(R.string.nurse_message_icon)) }
+                        )
                     }
                 }
             )

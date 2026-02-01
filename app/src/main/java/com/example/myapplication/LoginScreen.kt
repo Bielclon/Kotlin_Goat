@@ -1,73 +1,33 @@
-package com.example.myapplication.ui
+package com.example.myapplication
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun LoginScreen(
-    navController: NavController,
-    viewModel: AuthViewModel = viewModel() // 1. Inyectamos nuestro ViewModel
-) {
-    // 2. Observamos el estado del ViewModel
-    val state = viewModel.authState
-    val context = LocalContext.current
-
-    // Estado local solo para la visibilidad de la contraseña
+fun LoginScreen(navController: NavController) {
+    // Estados para los campos de texto
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
 
-    // 3. REACCIÓN: Cuando el estado cambia a Success o Error
-    LaunchedEffect(state) {
-        when (state) {
-            is AuthState.Success -> {
-                Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
-                // Navegar a la lista (ajusta la ruta "listAll" si es necesario)
-                navController.navigate("listAll") {
-                    popUpTo("login") { inclusive = true }
-                }
-            }
-            is AuthState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-            }
-            else -> {}
-        }
-    }
+    val viewModel: NurseViewModel = viewModel()
 
     Column(
         modifier = Modifier
@@ -84,36 +44,65 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- Campo Usuario (Conectado al ViewModel) ---
+        // --- Campo Usuario ---
         OutlinedTextField(
-            value = viewModel.email, // Usamos la variable del ViewModel
-            onValueChange = { viewModel.email = it },
-            label = { Text("Email / Usuario") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+            value = username,
+            onValueChange = {
+                username = it
+                isError = false
+            },
+            label = { Text("Usuario") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null
+                )
+            },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            enabled = state !is AuthState.Loading // Se bloquea si está cargando
+            isError = isError
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Campo Contraseña (Conectado al ViewModel) ---
+        // --- Campo Contraseña ---
         OutlinedTextField(
-            value = viewModel.password, // Usamos la variable del ViewModel
-            onValueChange = { viewModel.password = it },
+            value = password,
+            onValueChange = {
+                password = it
+                isError = false
+            },
             label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
             trailingIcon = {
-                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else
+                    Icons.Filled.VisibilityOff
+
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Ocultar" else "Mostrar")
+                    Icon(
+                        imageVector = image,
+                        contentDescription = if (passwordVisible) "Ocultar" else "Mostrar"
+                    )
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            enabled = state !is AuthState.Loading // Se bloquea si está cargando
+            isError = isError,
+            supportingText = {
+                if (isError) {
+                    Text(
+                        text = "Usuario o contraseña incorrectos",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -121,29 +110,20 @@ fun LoginScreen(
         // --- Botón Login ---
         Button(
             onClick = {
-                // 4. ACCIÓN: Llamamos al login real del servidor
-                viewModel.login()
+                viewModel.login(username, password) { ok, _ ->
+                    if (ok) {
+                        navController.navigate("listAll") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        isError = true
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth(),
-            // Deshabilitado si los campos están vacíos O si ya está cargando
-            enabled = viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty() && state !is AuthState.Loading
+            enabled = username.isNotEmpty() && password.isNotEmpty()
         ) {
-            if (state is AuthState.Loading) {
-                // Mostramos circulito si está cargando
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Entrar")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botón extra para ir al registro (según pide el PDF)
-        TextButton(onClick = { navController.navigate("register") }) {
-            Text("¿No tienes cuenta? Regístrate")
+            Text("Entrar")
         }
     }
 }
