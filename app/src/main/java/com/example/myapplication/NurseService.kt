@@ -4,10 +4,27 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Body
+import retrofit2.http.PUT
+import retrofit2.http.DELETE
+import retrofit2.http.POST
 
 interface NurseService {
     @GET("nurse/index")
     fun listarNurses(): Call<List<Nurse>>
+
+    @GET("nurse/{id}")
+    fun getNurseById(@Path("id") id: Long): Call<Nurse>
+
+    @PUT("nurse/{id}")
+    fun updateNurse(@Path("id") id: Long, @Body nurse: Nurse): Call<Nurse>
+
+    @DELETE("nurse/{id}")
+    fun deleteNurse(@Path("id") id: Long): Call<Void>
+
+    @POST("nurse/login")
+    fun login(@Body request: LoginRequest): Call<LoginResponse>
 }
 
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -25,6 +26,8 @@ fun LoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
+
+    val viewModel: NurseViewModel = viewModel()
 
     Column(
         modifier = Modifier
@@ -107,16 +110,14 @@ fun LoginScreen(navController: NavController) {
         // --- Botón Login ---
         Button(
             onClick = {
-                // Lógica de validación contra NurseData (fuente única compartida)
-                val userFound = NurseData.nurses.find { it.username == username && it.password == password }
-
-                if (userFound != null) {
-                    // Navegar a la lista y limpiar historial
-                    navController.navigate("listAll") {
-                        popUpTo("login") { inclusive = true }
+                viewModel.login(username, password) { ok, _ ->
+                    if (ok) {
+                        navController.navigate("listAll") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        isError = true
                     }
-                } else {
-                    isError = true
                 }
             },
             modifier = Modifier.fillMaxWidth(),
