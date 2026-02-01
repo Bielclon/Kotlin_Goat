@@ -10,6 +10,7 @@ import retrofit2.http.PUT
 import retrofit2.http.DELETE
 import retrofit2.Response
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface NurseService {
     @GET("nurse/index")
@@ -24,13 +25,17 @@ interface NurseService {
     @DELETE("nurse/{id}")
     fun deleteNurse(@Path("id") id: Long): Call<Void>
   
+    // Suspend version for login/register to use coroutines in ViewModels
     @POST("nurse/login")
-    fun login(@Body request: LoginRequest): Call<LoginResponse>
+    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
 
     @POST("nurse/register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
-}
 
+    // Buscar por nombre (backend usa @RequestParam("name"))
+    @GET("nurse/findByName")
+    suspend fun buscarEnfermeros(@Query("name") query: String): Response<List<Nurse>>
+}
 
 
 

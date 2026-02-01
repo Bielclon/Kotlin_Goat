@@ -37,6 +37,30 @@ class AuthViewModel : ViewModel() {
     var authState by mutableStateOf<AuthState>(AuthState.Idle)
         private set
 
+    // --- LOGIN ---
+    fun login() {
+        if (email.isBlank() || password.isBlank()) {
+            authState = AuthState.Error("Faltan datos")
+            return
+        }
+
+        authState = AuthState.Loading
+        viewModelScope.launch {
+            try {
+                val request = LoginRequest(email = email, password = password)
+                val response = RetrofitClient.instance.login(request) // Asegúrate que tu Retrofit tenga .login
+
+                if (response.isSuccessful && response.body() != null) {
+                    authState = AuthState.Success(response.body()!!.token)
+                } else {
+                    authState = AuthState.Error("Error: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                authState = AuthState.Error("Fallo red: ${e.message}")
+            }
+        }
+    }
+
     // --- REGISTRO ---
     fun register() {
         if (password != confirmPassword) {
@@ -52,6 +76,8 @@ class AuthViewModel : ViewModel() {
 
                 val request = RegisterRequest(
                     name = fullName,
+                    surname = surname,
+                    username = username,
                     email = email,
                     password = password,
                     photoUrl = null
