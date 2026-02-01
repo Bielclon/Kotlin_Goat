@@ -8,6 +8,8 @@ import retrofit2.http.Path
 import retrofit2.http.Body
 import retrofit2.http.PUT
 import retrofit2.http.DELETE
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface NurseService {
@@ -22,10 +24,15 @@ interface NurseService {
 
     @DELETE("nurse/{id}")
     fun deleteNurse(@Path("id") id: Long): Call<Void>
-
+  
     @POST("nurse/login")
     fun login(@Body request: LoginRequest): Call<LoginResponse>
+
+    @POST("nurse/register")
+    suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
 }
+
+
 
 
 object RetrofitClient {

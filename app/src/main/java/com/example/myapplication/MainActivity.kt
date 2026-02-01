@@ -12,8 +12,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.ui.LoginScreen
 import com.example.myapplication.ui.NurseSearch
 import com.example.myapplication.ProfileScreen
+import com.example.myapplication.ui.RegisterScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {

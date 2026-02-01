@@ -1,5 +1,6 @@
-package com.example.myapplication
+package com.example.myapplication.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,43 +8,53 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R // Importante para R.color.nurse_icon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel() // Inyectamos el ViewModel corregido
+) {
+    // Leemos el estado del ViewModel (Idle, Loading, Success, Error)
+    val state = viewModel.authState
+    val context = LocalContext.current
 
-    // Estados para los campos del formulario
-    var name by remember { mutableStateOf("") }
-    var surname by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
-    // Estados para validación y visualización
+    // Estado local solo para ver/ocultar contraseña (es visual, no de negocio)
     var passwordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
 
+    // Colores
     val primaryColor = colorResource(id = R.color.nurse_icon)
     val backgroundColor = MaterialTheme.colorScheme.background
+
+    // --- REACCIÓN: Si el estado cambia a Success (Registro OK) ---
+    LaunchedEffect(state) {
+        if (state is AuthState.Success) {
+            Toast.makeText(context, "¡Cuenta creada con éxito!", Toast.LENGTH_SHORT).show()
+            // Navegar a la lista de enfermeros
+            navController.navigate("listAll") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+        if (state is AuthState.Error) {
+            Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -63,20 +74,18 @@ fun RegisterScreen(navController: NavController) {
         }
     ) { paddingValues ->
 
-        // Usamos Column con verticalScroll para evitar que el teclado tape los campos
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()), // Habilita el scroll
+                .verticalScroll(rememberScrollState()), // Scroll habilitado
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Icono decorativo
+            // Icono superior
             Icon(
                 imageVector = Icons.Default.Badge,
                 contentDescription = null,
@@ -86,16 +95,14 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- CAMPOS DEL FORMULARIO ---
-
-            // 1. Nombre
+            // 1. NOMBRE (Conectado a viewModel.name)
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = viewModel.name,
+                onValueChange = { viewModel.name = it },
                 label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Person, null, tint = primaryColor) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor,
@@ -105,14 +112,14 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 2. Apellidos
+            // 2. APELLIDOS (Conectado a viewModel.surname)
             OutlinedTextField(
-                value = surname,
-                onValueChange = { surname = it },
+                value = viewModel.surname,
+                onValueChange = { viewModel.surname = it },
                 label = { Text("Apellidos") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Person, null, tint = primaryColor) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
@@ -121,14 +128,14 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 3. Usuario
+            // 3. USUARIO (Conectado a viewModel.username)
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = viewModel.username,
+                onValueChange = { viewModel.username = it },
                 label = { Text("Nombre de usuario") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Badge, null, tint = primaryColor) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
@@ -137,15 +144,15 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 4. Email
+            // 4. EMAIL (Conectado a viewModel.email)
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = viewModel.email,
+                onValueChange = { viewModel.email = it },
                 label = { Text("Correo electrónico") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Email, null, tint = primaryColor) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
@@ -154,16 +161,16 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 5. Contraseña
+            // 5. CONTRASEÑA (Conectado a viewModel.password)
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = viewModel.password,
+                onValueChange = { viewModel.password = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
@@ -180,24 +187,26 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 6. Confirmar Contraseña
+            // 6. CONFIRMAR CONTRASEÑA (Conectado a viewModel.confirmPassword)
+            val isMatch = viewModel.confirmPassword.isEmpty() || viewModel.confirmPassword == viewModel.password
+
             OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                value = viewModel.confirmPassword,
+                onValueChange = { viewModel.confirmPassword = it },
                 label = { Text("Confirmar contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = primaryColor) },
+                leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primaryColor,
                     focusedLabelColor = primaryColor
                 ),
-                isError = confirmPassword.isNotEmpty() && confirmPassword != password
+                isError = !isMatch
             )
 
-            if (confirmPassword.isNotEmpty() && confirmPassword != password) {
+            if (!isMatch) {
                 Text("Las contraseñas no coinciden", color = Color.Red, fontSize = 12.sp)
             }
 
@@ -206,45 +215,23 @@ fun RegisterScreen(navController: NavController) {
             // --- BOTÓN DE REGISTRO ---
             Button(
                 onClick = {
-                    // Validaciones básicas
-                    if (name.isBlank() || surname.isBlank() || username.isBlank() || email.isBlank() || password.isBlank()) {
-                        errorMessage = "Por favor, rellena todos los campos"
-                    } else if (password != confirmPassword) {
-                        errorMessage = "Las contraseñas no coinciden"
-                    } else {
-                        // Creamos el nuevo enfermero/a
-                        val newNurse = Nurse(
-                            id = (NurseData.nurses.size + 1).toLong(),
-                            name = name,
-                            surname = surname,
-                            password = password,
-                            username = username,
-                            email = email,
-                            photo = null
-                        )
-                        // Añadimos el nuevo enfermero a nuestra lista compartida
-                        NurseData.addNurse(newNurse)
-
-                        // Navegamos al Login
-                        navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
-                        }
-                    }
+                    viewModel.register() // Llama al servidor
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                // Deshabilitar botón si está cargando
+                enabled = state !is AuthState.Loading
             ) {
-                Text("Registrarse", color = Color.White)
-            }
-
-            if (errorMessage.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(errorMessage, color = Color.Red)
+                if (state is AuthState.Loading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Registrarse", color = Color.White)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón para ir al Login si ya tiene cuenta
+            // Botón volver
             TextButton(onClick = { navController.navigate("login") }) {
                 Text("¿Ya tienes cuenta? Inicia sesión", color = primaryColor)
             }
