@@ -7,10 +7,15 @@ import retrofit2.http.GET
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface NurseService {
     @GET("nurse/index")
     fun listarNurses(): Call<List<Nurse>>
+
+    // --- AÑADIR: Buscar por nombre ---
+    @GET("nurse/findByName")
+    suspend fun buscarEnfermeros(@Query("name") query: String): Response<List<Nurse>>
 
     // --- NUEVO: Autenticación ---
     // Nota: Verifica si la ruta en Kotlin_Goat es "login" o "auth/login"

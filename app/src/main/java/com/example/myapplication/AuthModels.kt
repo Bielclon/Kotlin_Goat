@@ -11,9 +11,10 @@ data class LoginRequest(
 // Lo que enviamos para el Registro
 data class RegisterRequest(
     val name: String,
+    val surname: String,
+    val username: String,
     val email: String,
     val password: String,
-    // El PDF menciona "imágenes de perfil", ponlo opcional por ahora si no es obligatorio
     val photoUrl: String? = null
 )
 

@@ -181,7 +181,7 @@ fun NurseItem(nurse: Nurse) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${nurse.name} ${nurse.surname}",
+                    text = "${nurse.name ?: "Sin Nombre"} ${nurse.surname ?: ""}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row() {
@@ -193,7 +193,7 @@ fun NurseItem(nurse: Nurse) {
                     )
                     Spacer(modifier = Modifier.width(5.dp))
                     Text(
-                        text = nurse.username,
+                        text = nurse.username ?: "Sin Usuario",
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorResource(R.color.text_primary)
                     )
@@ -209,7 +209,7 @@ fun NurseItem(nurse: Nurse) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = nurse.email,
+                        text = nurse.email ?: "Sin Email",
                         style = MaterialTheme.typography.bodySmall,
                         color = colorResource(R.color.text_primary)
                     )

@@ -2,17 +2,17 @@ package com.example.myapplication.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-// Estos 3 imports son MÁGICOS para que funcione el "by mutableStateOf"
+// Imports para los estados de Compose
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
-// Tus modelos y retrofit
+// Imports de tus modelos y red
 import com.example.myapplication.RetrofitClient
 import com.example.myapplication.LoginRequest
 import com.example.myapplication.RegisterRequest
 
-// 1. DEFINIMOS LOS ESTADOS AQUÍ MISMO (Para que no dé error de "Unresolved reference")
+// Definición de estados
 sealed interface AuthState {
     object Idle : AuthState
     object Loading : AuthState
@@ -20,76 +20,89 @@ sealed interface AuthState {
     data class Error(val message: String) : AuthState
 }
 
-// 2. LA CLASE VIEWMODEL
 class AuthViewModel : ViewModel() {
 
-    // --- VARIABLES DE TEXTO ---
+    // --- VARIABLES DEL FORMULARIO ---
+    // Login y Registro comparten email/password
     var email by mutableStateOf("")
     var password by mutableStateOf("")
 
-    // Variables extra para Registro
+    // Exclusivas de Registro
     var name by mutableStateOf("")
     var surname by mutableStateOf("")
     var username by mutableStateOf("")
     var confirmPassword by mutableStateOf("")
 
-    // --- ESTADO DE LA APP (Cargando, Error, etc.) ---
+    // --- ESTADO DE LA UI ---
     var authState by mutableStateOf<AuthState>(AuthState.Idle)
         private set
 
-    // --- LOGIN ---
+    // --- FUNCIÓN LOGIN ---
     fun login() {
         if (email.isBlank() || password.isBlank()) {
-            authState = AuthState.Error("Faltan datos")
+            authState = AuthState.Error("Por favor, rellena email y contraseña")
             return
         }
 
         authState = AuthState.Loading
         viewModelScope.launch {
             try {
+
                 val request = LoginRequest(email = email, password = password)
-                val response = RetrofitClient.instance.login(request) // Asegúrate que tu Retrofit tenga .login
+
+                val response = RetrofitClient.instance.login(request)
 
                 if (response.isSuccessful && response.body() != null) {
                     authState = AuthState.Success(response.body()!!.token)
                 } else {
-                    authState = AuthState.Error("Error: ${response.code()}")
+                    authState = AuthState.Error("Login fallido: ${response.code()}")
                 }
             } catch (e: Exception) {
-                authState = AuthState.Error("Fallo red: ${e.message}")
+                authState = AuthState.Error("Fallo de red: ${e.message}")
             }
         }
     }
 
-    // --- REGISTRO ---
+    // --- FUNCIÓN REGISTER ---
     fun register() {
+        // 1. Validaciones locales
         if (password != confirmPassword) {
-            authState = AuthState.Error("Contraseñas no coinciden")
+            authState = AuthState.Error("Las contraseñas no coinciden")
+            return
+        }
+        if (name.isBlank() || surname.isBlank() || username.isBlank() || email.isBlank()) {
+            authState = AuthState.Error("Todos los campos son obligatorios")
             return
         }
 
         authState = AuthState.Loading
         viewModelScope.launch {
             try {
-                // Unimos nombre y apellidos si el backend pide solo "name"
-                val fullName = "$name $surname".trim()
+                // 2. CORRECCIÓN IMPORTANTE:
+                // Enviamos los datos tal cual, sin unirlos.
+                // El backend se encarga de guardarlos en sus columnas.
 
                 val request = RegisterRequest(
-                    name = fullName,
-                    email = email,
+                    name = name.trim(),        // Enviamos solo el nombre limpio
+                    surname = surname.trim(),  // Enviamos solo el apellido limpio
+                    username = username.trim(),
+                    email = email.trim(),
                     password = password,
-                    photoUrl = null
+                    photoUrl = null // Opcional
                 )
 
-                val response = RetrofitClient.instance.register(request) // Asegúrate que tu Retrofit tenga .register
+                val response = RetrofitClient.instance.register(request)
 
                 if (response.isSuccessful && response.body() != null) {
+                    // Si el registro devuelve token, entramos directo (Success)
                     authState = AuthState.Success(response.body()!!.token)
                 } else {
-                    authState = AuthState.Error("Error registro: ${response.code()}")
+                    // Aquí capturamos el Error 400 (Usuario ya existe)
+                    val errorMsg = if (response.code() == 400) "El usuario o email ya existe" else "Error: ${response.code()}"
+                    authState = AuthState.Error(errorMsg)
                 }
             } catch (e: Exception) {
-                authState = AuthState.Error("Fallo red: ${e.message}")
+                authState = AuthState.Error("Fallo de conexión: ${e.message}")
             }
         }
     }
